@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Guessify - Think of a Character{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <!-- Genie Image -->
+    <div class="genie-container mb-8">
+        <div class="text-9xl">🧞‍♂️</div>
+    </div>
+
+    <!-- Welcome Card -->
+    <div class="card rounded-3xl p-8 md:p-12 max-w-2xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-bold text-purple-900 mb-4">
+            Welcome to Guessify !
+        </h1>
+        <p class="text-xl text-gray-700 mb-8">
+            Think of a <span class="font-bold text-purple-600">real or fictional character</span>, 
+            and I will try to guess it!
+        </p>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-8">
+            <div class="bg-purple-100 rounded-xl p-4">
+                <div class="text-3xl font-bold text-purple-900">{{ stats.total_characters }}</div>
+                <div class="text-sm text-gray-600">Characters</div>
+            </div>
+            <div class="bg-pink-100 rounded-xl p-4">
+                <div class="text-3xl font-bold text-pink-900">{{ stats.total_games }}</div>
+                <div class="text-sm text-gray-600">Games Played</div>
+            </div>
+            <div class="bg-indigo-100 rounded-xl p-4">
+                <div class="text-3xl font-bold text-indigo-900">{{ stats.win_rate }}%</div>
+                <div class="text-sm text-gray-600">Win Rate</div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-8 text-left">
+            <h3 class="font-bold text-lg text-purple-900 mb-3">📖 How to Play:</h3>
+            <ol class="space-y-2 text-gray-700">
+                <li>1️⃣ Think of any character (real or fictional)</li>
+                <li>2️⃣ Answer my questions honestly</li>
+                <li>3️⃣ I'll try to guess your character!</li>
+                <li>4️⃣ Be amazed by my powers! ✨</li>
+            </ol>
+        </div>
+
+        <!-- Start Button -->
+        <a href="{% url 'game:select_category' %}" 
+           class="btn-primary inline-block text-white font-bold text-xl px-12 py-4 rounded-full shadow-lg hover:shadow-2xl transition">
+            🎮 Start Playing
+        </a>
+
+        <!-- Additional Info -->
+        <p class="text-sm text-gray-500 mt-6">
+            Ready to be amazed? Let's begin! 🚀
+        </p>
+    </div>
+
+    <!-- Features -->
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+        <div class="card rounded-2xl p-6 text-center">
+            <div class="text-5xl mb-3">🎯</div>
+            <h3 class="font-bold text-lg mb-2 text-purple-900">Accurate</h3>
+            <p class="text-gray-600 text-sm">Advanced AI to guess your character</p>
+        </div>
+        <div class="card rounded-2xl p-6 text-center">
+            <div class="text-5xl mb-3">⚡</div>
+            <h3 class="font-bold text-lg mb-2 text-purple-900">Fast</h3>
+            <p class="text-gray-600 text-sm">Get results in just a few questions</p>
+        </div>
+        <div class="card rounded-2xl p-6 text-center">
+            <div class="text-5xl mb-3">🎨</div>
+            <h3 class="font-bold text-lg mb-2 text-purple-900">Fun</h3>
+            <p class="text-gray-600 text-sm">Enjoy an entertaining experience</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
