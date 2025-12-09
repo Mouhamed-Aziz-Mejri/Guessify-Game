@@ -52,7 +52,7 @@ class Guessify:
         print(f"{'='*80}")
         
         # Create and train the decision tree on ALL data
-        # For small datasets, we want perfect memorization
+        
         self.model = DecisionTreeClassifier(
             criterion='gini',           # Use gini impurity
             max_depth=None,             # No limit - learn everything
