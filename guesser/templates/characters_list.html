@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% block title %}All Celebrities - Celebrity Guesser{% endblock %}
+{% block content %}
+<div class="text-center">
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+            🌟 All Celebrities
+        </h1>
+        <p class="text-purple-200 text-lg">
+            Browse our collection of {{ total_celebrities }} famous celebrities
+        </p>
+    </div>
+    
+    <!-- Main Card -->
+    <div class="card rounded-3xl p-6 md:p-8">
+        <!-- Search Bar -->
+        <div class="mb-6">
+            <input type="text" 
+                   id="searchInput" 
+                   placeholder="🔍 Search celebrities..." 
+                   class="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-500 focus:outline-none text-gray-700">
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap gap-2 mb-6 justify-center">
+            <button onclick="filterCategory('all')" 
+                    id="filter-all"
+                    class="filter-btn bg-purple-500 text-white px-4 py-2 rounded-full font-semibold text-sm hover:bg-purple-600 transition shadow-md">
+                ⭐ All ({{ total_celebrities }})
+            </button>
+            <button onclick="filterCategory('actor')" 
+                    id="filter-actor"
+                    class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full font-semibold text-sm hover:bg-gray-300 transition">
+                🎬 Actors (<span id="actorCountBtn">0</span>)
+            </button>
+            <button onclick="filterCategory('musician')" 
+                    id="filter-musician"
+                    class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full font-semibold text-sm hover:bg-gray-300 transition">
+                🎵 Musicians (<span id="musicianCountBtn">0</span>)
+            </button>
+            <button onclick="filterCategory('athlete')" 
+                    id="filter-athlete"
+                    class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full font-semibold text-sm hover:bg-gray-300 transition">
+                ⚽ Athletes (<span id="athleteCountBtn">0</span>)
+            </button>
+            <button onclick="filterCategory('entrepreneur')" 
+                    id="filter-entrepreneur"
+                    class="filter-btn bg-gray-200 text-gray-700 px-4 py-2 rounded-full font-semibold text-sm hover:bg-gray-300 transition">
+                💼 Entrepreneurs (<span id="entrepreneurCountBtn">0</span>)
+            </button>
+        </div>
+
+        <!-- Result Count -->
+        <div class="mb-4">
+            <p class="text-gray-600 text-sm">
+                Showing <span id="resultCount" class="font-bold text-purple-600">{{ total_celebrities }}</span> celebrities
+            </p>
+        </div>
+
+        <!-- Characters Grid -->
+        <div id="charactersGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+            {% for celebrity in celebrities %}
+            <div class="character-card" 
+                data-name="{{ celebrity.name|lower }}" 
+                data-actor="{{ celebrity.actor|yesno:'true,false' }}"
+                data-musician="{{ celebrity.musician|yesno:'true,false' }}"
+                data-athlete="{{ celebrity.athlete|yesno:'true,false' }}"
+                data-entrepreneur="{{ celebrity.entrepreneur|yesno:'true,false' }}">
+                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 hover:shadow-lg transition transform hover:-translate-y-1 cursor-pointer">
+<!-- Avatar -->
+{% load static %}
+<div class="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden shadow-md border-2 border-purple-200 bg-white">
+    {% if celebrity.has_image %}
+        <img src="{% static 'images/celebrities/' %}{{ celebrity.image_filename }}" 
+             alt="{{ celebrity.name }}"
+             class="w-full h-full object-cover"
+             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ celebrity.name|urlencode }}&size=200&background=a855f7&color=fff&bold=true';">
+    {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ celebrity.name|urlencode }}&size=200&background=a855f7&color=fff&bold=true" 
+             alt="{{ celebrity.name }}"
+             class="w-full h-full object-cover">
+    {% endif %}
+</div>
+                    <!-- Name -->
+                    <h3 class="font-bold text-sm text-gray-800 mb-2">
+                        {{ celebrity.name }}
+                    </h3>
+                    
+                    <!-- Category Tags -->
+                    <div class="flex flex-wrap gap-1 justify-center">
+                        {% if celebrity.actor %}
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">🎬</span>
+                        {% endif %}
+                        {% if celebrity.musician %}
+                        <span class="text-xs bg-pink-100 text-pink-800 px-2 py-1 rounded-full">🎵</span>
+                        {% endif %}
+                        {% if celebrity.athlete %}
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">⚽</span>
+                        {% endif %}
+                        {% if celebrity.entrepreneur %}
+                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">💼</span>
+                        {% endif %}
+                        {% if celebrity.politician %}
+                        <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">🏛️</span>
+                        {% endif %}
+                        {% if celebrity.scientist %}
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full">🔬</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="hidden mb-6">
+            <div class="bg-gray-100 rounded-xl p-6">
+                <div class="text-5xl mb-3">🔍</div>
+                <p class="text-gray-600 font-semibold">No celebrities found</p>
+                <p class="text-gray-500 text-sm">Try a different search or filter</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-3 mb-6">
+            <div class="bg-purple-50 rounded-xl p-3">
+                <div class="text-xl font-bold text-purple-900" id="actorCount">0</div>
+                <div class="text-xs text-gray-600">Actors</div>
+            </div>
+            <div class="bg-pink-50 rounded-xl p-3">
+                <div class="text-xl font-bold text-pink-900" id="musicianCount">0</div>
+                <div class="text-xs text-gray-600">Musicians</div>
+            </div>
+            <div class="bg-green-50 rounded-xl p-3">
+                <div class="text-xl font-bold text-green-900" id="athleteCount">0</div>
+                <div class="text-xs text-gray-600">Athletes</div>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <a href="{% url 'home' %}" 
+           class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-base px-8 py-3 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+            ← Back to Home
+        </a>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        applyFilters(currentFilter, searchTerm);
+    });
+
+    // Filter by category
+    function filterCategory(category) {
+        currentFilter = category;
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        
+        // Update button styles
+        const buttons = document.querySelectorAll('.filter-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-purple-500', 'text-white', 'shadow-md');
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        
+        const activeBtn = document.getElementById('filter-' + category);
+        activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+        activeBtn.classList.add('bg-purple-500', 'text-white', 'shadow-md');
+        
+        // Apply filters
+        applyFilters(category, searchTerm);
+    }
+
+    // Apply both category and search filters
+    function applyFilters(category, searchTerm) {
+        const cards = document.querySelectorAll('.character-card');
+        let visibleCount = 0;
+        
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            const isActor = card.getAttribute('data-actor') === 'true';
+            const isMusician = card.getAttribute('data-musician') === 'true';
+            const isAthlete = card.getAttribute('data-athlete') === 'true';
+            const isEntrepreneur = card.getAttribute('data-entrepreneur') === 'true';
+            
+            // Check category match
+            let categoryMatch = false;
+            if (category === 'all') {
+                categoryMatch = true;
+            } else if (category === 'actor' && isActor) {
+                categoryMatch = true;
+            } else if (category === 'musician' && isMusician) {
+                categoryMatch = true;
+            } else if (category === 'athlete' && isAthlete) {
+                categoryMatch = true;
+            } else if (category === 'entrepreneur' && isEntrepreneur) {
+                categoryMatch = true;
+            }
+            
+            // Check search match
+            const searchMatch = name.includes(searchTerm);
+            
+            // Show/hide card
+            if (categoryMatch && searchMatch) {
+                card.style.display = 'block';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // Update result count
+        document.getElementById('resultCount').textContent = visibleCount;
+        
+        // Show/hide no results message
+        const noResults = document.getElementById('noResults');
+        const grid = document.getElementById('charactersGrid');
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+            grid.classList.add('hidden');
+        } else {
+            noResults.classList.add('hidden');
+            grid.classList.remove('hidden');
+        }
+    }
+
+    // Calculate and display stats on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.character-card');
+        let actorCount = 0;
+        let musicianCount = 0;
+        let athleteCount = 0;
+        let entrepreneurCount = 0;
+        
+        cards.forEach(card => {
+            if (card.getAttribute('data-actor') === 'true') actorCount++;
+            if (card.getAttribute('data-musician') === 'true') musicianCount++;
+            if (card.getAttribute('data-athlete') === 'true') athleteCount++;
+            if (card.getAttribute('data-entrepreneur') === 'true') entrepreneurCount++;
+        });
+        
+        document.getElementById('actorCount').textContent = actorCount;
+        document.getElementById('musicianCount').textContent = musicianCount;
+        document.getElementById('athleteCount').textContent = athleteCount;
+        
+        document.getElementById('actorCountBtn').textContent = actorCount;
+        document.getElementById('musicianCountBtn').textContent = musicianCount;
+        document.getElementById('athleteCountBtn').textContent = athleteCount;
+        document.getElementById('entrepreneurCountBtn').textContent = entrepreneurCount;
+    });
+</script>
+{% endblock %}

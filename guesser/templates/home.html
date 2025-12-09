@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Guessify Game - Think of a Celebrity{% endblock %}
+{% block content %}
+<div class="text-center">
+     <div class="absolute top-4 right-4">
+        {% if user.is_authenticated %}
+        <div class="relative group">
+            <button class="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-lg hover:shadow-xl transition">
+                <div class="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <span class="font-semibold text-gray-700">{{ user.username }}</span>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                <a href="{% url 'profile' %}" class="block px-4 py-3 text-gray-700 hover:bg-purple-50 rounded-t-xl">
+                    👤 My Profile
+                </a>
+                <a href="{% url 'logout' %}" class="block px-4 py-3 text-red-600 hover:bg-red-50 rounded-b-xl">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="flex gap-2">
+            <a href="{% url 'login' %}" 
+               class="bg-white text-purple-600 font-semibold px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition">
+                Login
+            </a>
+            <a href="{% url 'signup' %}" 
+               class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:shadow-xl transition">
+                Sign Up
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <!-- Genie Image -->
+    <div class="genie-container mb-6">
+        <div class="text-7xl">🧞‍♂️</div>
+    </div>
+    
+    <!-- Welcome Card -->
+    <div class="card rounded-3xl p-6 md:p-8 max-w-2xl mx-auto">
+        <h1 class="text-3xl md:text-4xl font-bold text-purple-900 mb-3">
+            Welcome to Guessify Game!
+        </h1>
+        <p class="text-lg text-gray-700 mb-6">
+            Think of a <span class="font-bold text-purple-600">famous celebrity</span>, 
+            and I will try to guess who it is!
+        </p>
+        
+<!-- Stats -->
+{% if user.is_authenticated and user_stats %}
+<!-- Personal Stats for Logged-in Users -->
+<div class="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4 mb-4">
+    <p class="text-sm font-semibold text-purple-900 mb-2">📊 Your Personal Stats</p>
+    <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-lg p-3">
+            <div class="text-2xl font-bold text-purple-900">{{ user_stats.total_games }}</div>
+            <div class="text-xs text-gray-600">Your Games</div>
+        </div>
+        <div class="bg-white rounded-lg p-3">
+            <div class="text-2xl font-bold text-green-900">{{ user_stats.correct_guesses }}</div>
+            <div class="text-xs text-gray-600">Your Wins</div>
+        </div>
+        <div class="bg-white rounded-lg p-3">
+            <div class="text-2xl font-bold text-pink-900">{{ user_stats.win_rate }}%</div>
+            <div class="text-xs text-gray-600">Your Rate</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Global Stats -->
+<div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-purple-100 rounded-xl p-3">
+        <div class="text-2xl font-bold text-purple-900">{{ total_celebrities }}</div>
+        <div class="text-xs text-gray-600">Celebrities</div>
+    </div>
+    <div class="bg-pink-100 rounded-xl p-3">
+        <div class="text-2xl font-bold text-pink-900">{{ total_games }}</div>
+        <div class="text-xs text-gray-600">Total Games</div>
+    </div>
+    <div class="bg-indigo-100 rounded-xl p-3">
+        <div class="text-2xl font-bold text-indigo-900">{{ win_rate }}%</div>
+        <div class="text-xs text-gray-600">Global Win Rate</div>
+    </div>
+</div>
+        
+        <!-- Instructions -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-6 text-left">
+            <h3 class="font-bold text-base text-purple-900 mb-2">📖 How to Play:</h3>
+            <ol class="space-y-1 text-gray-700 text-sm">
+                <li>1️⃣ Think of any famous celebrity</li>
+                <li>2️⃣ Answer my questions honestly (Yes or No)</li>
+                <li>3️⃣ I'll try to guess your celebrity in 10 questions!</li>
+            </ol>
+        </div>
+        
+       <!-- Action Buttons -->
+<div class="btn-container flex flex-col sm:flex-row gap-3 justify-center">
+    {% if user.is_authenticated %}
+        <a href="{% url 'start_game' %}" 
+           class="btn-primary inline-block text-white font-bold text-lg px-10 py-3 rounded-full shadow-lg hover:shadow-2xl transition">
+            🎮 Start Playing
+        </a>
+    {% else %}
+        <a href="{% url 'login' %}" 
+           class="btn-primary inline-block text-white font-bold text-lg px-10 py-3 rounded-full shadow-lg hover:shadow-2xl transition">
+            🔒 Login to Play
+        </a>
+    {% endif %}
+    
+    <a href="{% url 'characters_list' %}" 
+       class="inline-block bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-lg px-10 py-3 rounded-full shadow-lg hover:shadow-2xl transition">
+        👥 View All Celebrities
+    </a>
+</div>
+        
+        <!-- Additional Info -->
+        <p class="text-xs text-gray-500 mt-4">
+            Ready to be amazed? Let's begin! 🚀
+        </p>
+    </div>
+    
+    <!-- Features -->
+    <div class="grid md:grid-cols-3 gap-4 mt-8">
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-4xl mb-2">🎯</div>
+            <h3 class="font-bold text-base mb-1 text-purple-900">Accurate</h3>
+            <p class="text-gray-600 text-xs">Advanced decision tree AI to guess your celebrity</p>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-4xl mb-2">⚡</div>
+            <h3 class="font-bold text-base mb-1 text-purple-900">Fast</h3>
+            <p class="text-gray-600 text-xs">Get results in just a few smart questions</p>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-4xl mb-2">🎨</div>
+            <h3 class="font-bold text-base mb-1 text-purple-900">Fun</h3>
+            <p class="text-gray-600 text-xs">Enjoy an entertaining and interactive experience</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

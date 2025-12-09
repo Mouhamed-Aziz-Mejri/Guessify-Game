@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - Guessify Game{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">
+            My Profile
+        </h1>
+    </div>
+    
+    <!-- Profile Card -->
+    <div class="card rounded-3xl p-6 md:p-8 mb-6">
+        <!-- User Info -->
+        <div class="flex items-center gap-6 mb-8">
+            <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ user.username }}</h2>
+                <p class="text-gray-600">{{ user.email }}</p>
+                <p class="text-sm text-gray-500">Member since {{ user.date_joined|date:"M d, Y" }}</p>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-purple-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-purple-900">{{ total_games }}</div>
+                <div class="text-sm text-gray-600">Games Played</div>
+            </div>
+            <div class="bg-green-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-green-900">{{ correct_guesses }}</div>
+                <div class="text-sm text-gray-600">Correct Guesses</div>
+            </div>
+            <div class="bg-pink-50 rounded-xl p-4 text-center">
+                <div class="text-3xl font-bold text-pink-900">{{ win_rate }}%</div>
+                <div class="text-sm text-gray-600">Win Rate</div>
+            </div>
+        </div>
+        
+        <!-- Recent Games -->
+        {% if recent_games %}
+        <div class="mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Games</h3>
+            <div class="space-y-2">
+                {% for game in recent_games %}
+                <div class="flex items-center justify-between bg-gray-50 rounded-lg p-4">
+                    <div>
+                        <p class="font-semibold text-gray-800">{{ game.guessed_celebrity }}</p>
+                        <p class="text-sm text-gray-500">{{ game.created_at|date:"M d, Y - g:i A" }}</p>
+                    </div>
+                    {% if game.is_correct %}
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">✓ Correct</span>
+                    {% elif game.is_correct == False %}
+                    <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">✗ Wrong</span>
+                    {% else %}
+                    <span class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold">- Pending</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Actions -->
+        <div class="flex gap-3 justify-center">
+            <a href="{% url 'home' %}" 
+               class="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition">
+                🎮 Play Again
+            </a>
+            <a href="{% url 'logout' %}" 
+               class="bg-gray-200 text-gray-700 font-bold px-8 py-3 rounded-full hover:bg-gray-300 transition">
+                🚪 Logout
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Guessify Game - My Guess{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Confidence Bar -->
+    <div class="card rounded-2xl p-4 mb-4">
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-semibold text-gray-600">Confidence Level</span>
+            <span class="text-sm font-semibold text-green-600">{{ confidence|floatformat:0 }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div class="progress-bar bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all duration-500" 
+                 style="width: {{ confidence }}%"></div>
+        </div>
+    </div>
+
+    <!-- Result Card -->
+    <div class="card rounded-3xl p-6 md:p-8 text-center">
+        <!-- Genie -->
+        <div class="genie-container mb-4">
+            <div class="text-6xl">🧞‍♂️</div>
+        </div>
+
+        <h2 class="text-xl md:text-2xl font-bold text-purple-900 mb-3">
+            I think your celebrity is...
+        </h2>
+
+       <!-- Celebrity Name -->
+{% if guessed_celebrity == "No celebrity matches your answers" %}
+<div class="mb-6">
+    <div class="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full mx-auto shadow-2xl flex items-center justify-center text-white text-5xl font-bold border-4 border-gray-200">
+        ?
+    </div>
+</div>
+
+<h1 class="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
+    {{ guessed_celebrity }}
+</h1>
+
+<p class="text-gray-600 mb-6">
+    Sorry! None of our celebrities match all your answers. Try adjusting your responses or we may need to add more celebrities to our database!
+</p>
+{% else %}
+<!-- Celebrity Avatar/Initial -->
+<div class="mb-4">
+    <div class="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto shadow-2xl flex items-center justify-center text-white text-5xl font-bold border-4 border-purple-200">
+        {{ guessed_celebrity|slice:":1" }}
+    </div>
+</div>
+
+<!-- Celebrity Name -->
+<h1 class="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
+    {{ guessed_celebrity }}
+</h1>
+{% endif %}
+
+<!-- Stats -->
+<div class="grid grid-cols-2 gap-3 max-w-md mx-auto mb-5">
+    <div class="bg-purple-50 rounded-xl p-3">
+        <div class="text-xl font-bold text-purple-900">{{ questions_asked }}</div>
+        <div class="text-xs text-gray-600">Questions Asked</div>
+    </div>
+    <div class="bg-pink-50 rounded-xl p-3">
+        <div class="text-xl font-bold text-pink-900">{{ remaining_celebrities }}</div>
+        <div class="text-xs text-gray-600">Possible Matches</div>
+    </div>
+</div>
+
+        <!-- Confirmation Question -->
+        <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 mb-4">
+            <h3 class="font-bold text-lg text-purple-900 mb-3">
+                Did I guess correctly?
+            </h3>
+            
+            <form method="POST" action="{% url 'confirm_result' %}" class="flex flex-col sm:flex-row gap-3 justify-center">
+                {% csrf_token %}
+                
+                <!-- Yes, Correct -->
+                <button type="submit" name="is_correct" value="yes" 
+                        class="bg-gradient-to-r from-green-400 to-green-600 text-white font-bold text-base px-6 py-3 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+                    <span class="text-xl mr-1">🎉</span>
+                    Yes, Correct!
+                </button>
+
+                <!-- No, Wrong -->
+                <button type="submit" name="is_correct" value="no" 
+                        class="bg-gradient-to-r from-red-400 to-red-600 text-white font-bold text-base px-6 py-3 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+                    <span class="text-xl mr-1">❌</span>
+                    No, Wrong
+                </button>
+            </form>
+        </div>
+
+        <!-- Play Again Button -->
+        <a href="{% url 'home' %}" 
+           class="inline-block bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-base px-8 py-3 rounded-full shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition">
+            🔄 Play Again
+        </a>
+    </div>
+</div>
+{% endblock %}
