@@ -34,7 +34,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'celebrity_guesser.urls'
+ROOT_URLCONF = 'GuessifyGame.urls'
 
 TEMPLATES = [
     {
@@ -52,7 +52,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'celebrity_guesser.wsgi.application'
+WSGI_APPLICATION = 'GuessifyGame.wsgi.application'
 
 # Database
 DATABASES = {
