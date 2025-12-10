@@ -1,5 +1,4 @@
 # Editable install with no version control (akinator==2.0.2)
--e d:\tek up\sdia\django\project\akinator.py
 asgiref==3.9.2
 beautifulsoup4==4.14.3
 certifi==2025.10.5
