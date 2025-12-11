@@ -25,6 +25,7 @@ def signup_view(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
         
+        
         # Validation
         if not username or not email or not password:
             return render(request, 'registration/signup.html', {
