@@ -28,7 +28,7 @@ def signup_view(request):
         
         # Validation
         if not username or not email or not password:
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'All fields are required!'
             })
         
@@ -38,24 +38,24 @@ def signup_view(request):
             })
         
         if len(password) < 8:
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'Password must be at least 8 characters long!'
             })
         
         if password != confirm_password:
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'Passwords do not match!'
             })
         
         # Check if username already exists
         if User.objects.filter(username=username).exists():
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'Username already taken!'
             })
         
         # Check if email already exists
         if User.objects.filter(email=email).exists():
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'Email already registered!'
             })
         
@@ -75,11 +75,11 @@ def signup_view(request):
             return redirect('home')
             
         except IntegrityError:
-            return render(request, 'registration/signup.html', {
+            return render(request, 'signup.html', {
                 'error': 'An error occurred. Please try again.'
             })
     
-    return render(request, 'registration/signup.html')
+    return render(request, 'signup.html') #Error Deploy
 
 def login_view(request):
     """User login view"""
@@ -117,11 +117,11 @@ def login_view(request):
             next_page = request.GET.get('next', 'home')
             return redirect(next_page)
         else:
-            return render(request, 'registration/login.html', {
+            return render(request, 'login.html', {
                 'error': 'Invalid username or password!'
             })
     
-    return render(request, 'registration/login.html')
+    return render(request, 'login.html')
 
 
 def logout_view(request):
