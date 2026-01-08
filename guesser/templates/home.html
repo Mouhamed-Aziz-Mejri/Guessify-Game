@@ -73,6 +73,8 @@
 {% endif %}
 
 <!-- Global Stats -->
+ {% if user.is_superuser%}
+
 <div class="grid grid-cols-3 gap-3 mb-6">
     <div class="bg-purple-100 rounded-xl p-3">
         <div class="text-2xl font-bold text-purple-900">{{ total_celebrities }}</div>
@@ -87,7 +89,7 @@
         <div class="text-xs text-gray-600">Global Win Rate</div>
     </div>
 </div>
-        
+        {% endif %}
         <!-- Instructions -->
         <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-6 text-left">
             <h3 class="font-bold text-base text-purple-900 mb-2">📖 How to Play:</h3>

@@ -11,17 +11,25 @@
     
     <!-- Profile Card -->
     <div class="card rounded-3xl p-6 md:p-8 mb-6">
-        <!-- User Info -->
-        <div class="flex items-center gap-6 mb-8">
-            <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-                {{ user.username|slice:":1"|upper }}
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">{{ user.username }}</h2>
-                <p class="text-gray-600">{{ user.email }}</p>
-                <p class="text-sm text-gray-500">Member since {{ user.date_joined|date:"M d, Y" }}</p>
-            </div>
+        <!-- Dashboard Button - Top Right -->
+      <!-- User Info with Dashboard Button -->
+<div class="flex items-center justify-between mb-8">
+    <div class="flex items-center gap-6">
+        <div class="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+            {{ user.username|slice:":1"|upper }}
         </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">{{ user.username }}</h2>
+            <p class="text-gray-600">{{ user.email }}</p>
+            <p class="text-sm text-gray-500">Member since {{ user.date_joined|date:"M d, Y" }}</p>
+        </div>
+    </div>
+    <a href="{% url 'start' %}" 
+       class="bg-purple-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-purple-600 transition text-sm flex items-center gap-2 shadow-lg">
+        <span class="text-lg">🏠</span>
+        <span>Dashboard</span>
+    </a>
+</div>
         
         <!-- Stats -->
         <div class="grid grid-cols-3 gap-4 mb-6">
@@ -76,4 +84,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

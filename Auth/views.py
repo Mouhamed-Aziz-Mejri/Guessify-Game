@@ -120,7 +120,6 @@ def login_view(request):
             return render(request, 'login.html', {
                 'error': 'Invalid username or password!'
             })
-    
     return render(request, 'login.html')
 
 

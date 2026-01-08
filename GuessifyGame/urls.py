@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('Auth.urls')),  # Auth routes under /auth/
     path('', include('guesser.urls')), 
+    path('admin_auth/', include('admin_auth.urls')),  # Admin auth routes
 ]

@@ -1,0 +1,558 @@
+{% extends 'base.html' %}
+{% block title %}Manage Games - Admin Panel{% endblock %}
+{% block content %}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-white">Game Management</h1>
+            <p class="text-purple-200">Total Games: {{ total_games }}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'start' %}" 
+               class="bg-white text-purple-600 px-6 py-2 rounded-full font-semibold hover:bg-purple-600 hover:text-white hover:shadow-xl transition text-sm flex items-center gap-2 shadow-lg">
+                ← Back To Dashboard
+            </a>
+       
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-purple-900">{{ total_games }}</div>
+            <div class="text-sm text-gray-600">Total Games</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-green-900">{{ completed_games }}</div>
+            <div class="text-sm text-gray-600">Completed</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-yellow-900">{{ correct_games }}</div>
+            <div class="text-sm text-gray-600">Correct Guesses</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-blue-900">{{ win_rate }}%</div>
+            <div class="text-sm text-gray-600">Win Rate</div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card rounded-2xl p-6 mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="🔍 Search by user, celebrity, or session..." 
+                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filterGames('all')" 
+                        class="filter-btn active px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold hover:bg-purple-600 transition">
+                    All
+                </button>
+                <button onclick="filterGames('completed')" 
+                        class="filter-btn px-4 py-2 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                    Completed
+                </button>
+                <button onclick="filterGames('correct')" 
+                        class="filter-btn px-4 py-2 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                    Correct
+                </button>
+                <button onclick="filterGames('wrong')" 
+                        class="filter-btn px-4 py-2 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                    Wrong
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Games Table -->
+    <div class="card rounded-2xl p-6 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" id="gamesTable">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">#</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Player</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Celebrity Guessed</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Questions</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Status</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Result</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Date</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                    <tr class="game-row border-b hover:bg-gray-50 transition" 
+                        data-username="{{ game.user.username|lower }}"
+                        data-celebrity="{{ game.guessed_celebrity|lower }}"
+                        data-completed="{{ game.is_completed|yesno:'true,false' }}"
+                        data-correct="{{ game.is_correct|yesno:'true,false,pending' }}"
+                        data-game-id="{{ game.id }}">
+                        
+                        <!-- Game ID -->
+                        <td class="py-4 px-4 text-gray-600 font-semibold">{{ forloop.counter }}</td>
+                        
+                        <!-- Player Info -->
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+                                    {{ game.user.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-800">{{ game.user.username }}</div>
+                                    <div class="text-sm text-gray-500">{{ game.user.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <!-- Celebrity Guessed -->
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1 text-gray-700 font-semibold">
+                                🌟 {{ game.guessed_celebrity }}
+                            </span>
+                        </td>
+                        
+                        <!-- Questions Count -->
+                        <td class="py-4 px-4 text-center">
+                            <span class="inline-flex items-center justify-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-semibold text-sm">
+                                {{ game.answers.count }} ❓
+                            </span>
+                        </td>
+                        
+                        <!-- Status -->
+                        <td class="py-4 px-4 text-center">
+                            {% if game.is_completed %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full">
+                                ✓
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-100 text-yellow-600 rounded-full">
+                                ⏳
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Result -->
+                        <td class="py-4 px-4 text-center">
+                            {% if game.is_correct %}
+                            <span class="inline-flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold text-sm">
+                                ✓ Correct
+                            </span>
+                            {% elif game.is_correct == False %}
+                            <span class="inline-flex items-center gap-1 bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold text-sm">
+                                ✗ Wrong
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-semibold text-sm">
+                                — N/A
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Date & Time -->
+                        <td class="py-4 px-4 text-gray-600 text-sm">
+                            {{ game.created_at|date:"M d, Y" }}
+                            <br>
+                            <span class="text-xs text-gray-400">{{ game.created_at|date:"g:i A" }}</span>
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="py-4 px-4 text-center">
+                            <div class="flex gap-2 justify-center">
+                                
+                                <button onclick="viewAnswers({{ game.id }})" 
+                                        class="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-purple-200 transition"
+                                        title="View Answers">
+                                   👁️
+                                </button>
+                                <button onclick="deleteGame({{ game.id }}, '{{ game.user.username }}')" 
+                                        class="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-200 transition"
+                                        title="Delete">
+                                    🗑️
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-gray-500">
+                            No games found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- View Game Details Modal -->
+<div id="gameModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Game Details</h2>
+            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-3xl font-bold">×</button>
+        </div>
+        <div id="modalContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- View Answers Modal -->
+<div id="answersModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Game Answers</h2>
+            <button onclick="closeAnswersModal()" class="text-gray-500 hover:text-gray-700 text-3xl font-bold">×</button>
+        </div>
+        <div id="answersContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Search functionality
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const searchTerm = e.target.value.toLowerCase();
+        
+        searchTimeout = setTimeout(() => {
+            const rows = document.querySelectorAll('.game-row');
+            
+            rows.forEach(row => {
+                const username = row.getAttribute('data-username');
+                const celebrity = row.getAttribute('data-celebrity');
+                
+                if (username.includes(searchTerm) || celebrity.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }, 300);
+    });
+
+    // Filter functionality
+    function filterGames(type) {
+        const rows = document.querySelectorAll('.game-row');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        // Update button styles
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-purple-500', 'text-white');
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        event.target.classList.remove('bg-gray-200', 'text-gray-700');
+        event.target.classList.add('bg-purple-500', 'text-white');
+        
+        // Filter rows
+        rows.forEach(row => {
+            let shouldShow = false;
+            const completed = row.getAttribute('data-completed') === 'true';
+            const correct = row.getAttribute('data-correct');
+            
+            if (type === 'all') {
+                shouldShow = true;
+            } else if (type === 'completed') {
+                shouldShow = completed;
+            } else if (type === 'correct') {
+                shouldShow = correct === 'true';
+            } else if (type === 'wrong') {
+                shouldShow = correct === 'false';
+            }
+            
+            row.style.display = shouldShow ? '' : 'none';
+        });
+    }
+
+    // View Game Details
+    function viewGame(gameId) {
+        const modal = document.getElementById('gameModal');
+        const content = document.getElementById('modalContent');
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p class="mt-4 text-gray-600">Loading game details...</p>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+        
+        // Fetch game details
+        fetch(`/admin-panel/games/${gameId}/details/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const game = data.game;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Player</p>
+                                <p class="font-bold text-gray-800">${game.username}</p>
+                                <p class="text-sm text-gray-600">${game.email}</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Celebrity</p>
+                                <p class="font-bold text-gray-800">🌟 ${game.celebrity}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-blue-700">${game.questions_count}</p>
+                                <p class="text-sm text-blue-600">Questions</p>
+                            </div>
+                            <div class="bg-${game.is_completed ? 'green' : 'yellow'}-50 p-4 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-${game.is_completed ? 'green' : 'yellow'}-700">
+                                    ${game.is_completed ? '✓' : '⏳'}
+                                </p>
+                                <p class="text-sm text-${game.is_completed ? 'green' : 'yellow'}-600">
+                                    ${game.is_completed ? 'Completed' : 'Pending'}
+                                </p>
+                            </div>
+                            <div class="bg-${game.result_color}-50 p-4 rounded-xl text-center">
+                                <p class="text-2xl font-bold text-${game.result_color}-700">${game.result_icon}</p>
+                                <p class="text-sm text-${game.result_color}-600">${game.result_text}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-gray-50 p-4 rounded-xl">
+                            <p class="text-sm text-gray-500 mb-1">Game Started</p>
+                            <p class="font-semibold text-gray-800">${game.created_at}</p>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="viewAnswers(${gameId}); closeModal();" 
+                                    class="flex-1 bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition">
+                                📝 View Answers
+                            </button>
+                            <button onclick="closeModal()" 
+                                    class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-600 font-semibold">❌ Error loading game details</p>
+                        <p class="text-gray-600 mt-2">${data.error || 'Please try again'}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-red-600 font-semibold">❌ Error loading game details</p>
+                    <p class="text-gray-600 mt-2">Please try again</p>
+                </div>
+            `;
+            console.error('Error:', error);
+        });
+    }
+
+    // View Answers
+    function viewAnswers(gameId) {
+        const modal = document.getElementById('answersModal');
+        const content = document.getElementById('answersContent');
+        
+        // Show loading state
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p class="mt-4 text-gray-600">Loading answers...</p>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+        
+        // Fetch answers
+        fetch(`/admin_auth/games_list/${gameId}/answers/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const answers = data.answers;
+                const game = data.game;
+                
+                let answersHtml = `
+                    <div class="mb-6 bg-purple-50 p-4 rounded-xl">
+                        <h3 class="font-bold text-gray-800 mb-2">🌟 Celebrity: ${game.celebrity}</h3>
+                        <p class="text-gray-600">Player: ${game.username} | Questions: ${answers.length}</p>
+                    </div>
+                    <div class="space-y-4">
+                `;
+                
+                if (answers.length === 0) {
+                    answersHtml += `
+                        <div class="text-center py-8 text-gray-500">
+                            No answers found for this game
+                        </div>
+                    `;
+                } else {
+                    answers.forEach((answer, index) => {
+                        answersHtml += `
+                            <div class="border border-gray-200 rounded-xl p-4 hover:bg-gray-50 transition">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center font-bold flex-shrink-0">
+                                        ${index + 1}
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="font-semibold text-gray-800 mb-2">❓ ${answer.question}</p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold
+                                                ${answer.answer === 'Yes' ? 'bg-green-100 text-green-700' : 
+                                                  answer.answer === 'No' ? 'bg-red-100 text-red-700' : 
+                                                  'bg-gray-100 text-gray-700'}">
+                                                ${answer.answer === 'Yes' ? '✓' : answer.answer === 'No' ? '✗' : '—'} ${answer.answer}
+                                            </span>
+                                            <span class="text-xs text-gray-400">${answer.created_at}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                answersHtml += `
+                    </div>
+                    <div class="mt-6 flex gap-3">
+                        <button onclick="closeAnswersModal()" 
+                                class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                content.innerHTML = answersHtml;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-600 font-semibold">❌ Error loading answers</p>
+                        <p class="text-gray-600 mt-2">${data.error || 'Please try again'}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-red-600 font-semibold">❌ Error loading answers</p>
+                    <p class="text-gray-600 mt-2">Please try again</p>
+                </div>
+            `;
+            console.error('Error:', error);
+        });
+    }
+
+    // Delete Game
+    function deleteGame(gameId, username) {
+        if (confirm(`⚠️ Are you sure you want to delete the game session for "${username}"?\n\nThis action cannot be undone!`)) {
+            const csrftoken = getCookie('csrftoken');
+            
+fetch(`/admin_auth/games/${gameId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the row from the table
+                    const row = document.querySelector(`[data-game-id="${gameId}"]`);
+                    if (row) {
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            // Update stats if needed
+                            location.reload(); // Reload to update stats
+                        }, 300);
+                    }
+                    alert('✅ Game deleted successfully!');
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Failed to delete game'));
+                }
+            })
+            .catch(error => {
+                alert('❌ Error deleting game. Please try again.');
+                console.error('Error:', error);
+            });
+        }
+    }
+
+  
+    function closeModal() {
+        document.getElementById('gameModal').classList.add('hidden');
+    }
+
+    function closeAnswersModal() {
+        document.getElementById('answersModal').classList.add('hidden');
+    }
+
+    // Close modals on outside click
+    document.getElementById('gameModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    document.getElementById('answersModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAnswersModal();
+        }
+    });
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        if (e.key === 'Escape') {
+            closeModal();
+            closeAnswersModal();
+        }
+    });
+</script>
+
+{% endblock %}

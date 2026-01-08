@@ -1,0 +1,771 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users - Admin Panel{% endblock %}
+{% block content %}
+<style>
+    .filter-btn.active {
+        background-color: #7c3aed; /* Purple-500 */
+        color: white;
+    }
+</style>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <!-- Header -->
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-white">User Management</h1>
+        <p class="text-purple-200">Total Users: {{ users.count }}</p>
+    </div>
+    <div class="flex gap-3">
+        <button onclick="openAddUserModal()" 
+                class="bg-green-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-600 hover:shadow-xl transition text-sm flex items-center gap-2 shadow-lg">
+            <span class="text-lg">➕</span>
+            <span>Add User</span>
+        </button>
+        <a href="{% url 'start' %}" 
+           class="bg-white text-purple-600 px-6 py-2 rounded-full font-semibold hover:bg-purple-600 hover:text-white hover:shadow-xl transition text-sm flex items-center gap-2 shadow-lg">
+            <span class="text-lg">🏠</span>
+            <span>Dashboard</span>
+        </a>
+    </div>
+</div>
+ 
+    <!-- Search and Filter -->
+    <div class="card rounded-2xl p-6 mb-6">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <input type="text" 
+                       id="searchInput" 
+                       placeholder="🔍 Search by username or email..." 
+                       class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="filterUsers('all')" 
+                        class="filter-btn active px-4 py-2 rounded-xl bg-purple-500 text-white font-semibold hover:bg-purple-600 transition">
+                    All ({{ users.count }})
+                </button>
+                <button onclick="filterUsers('staff')" 
+                        class="filter-btn px-4 py-2 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                    Admins
+                </button>
+                <button onclick="filterUsers('active')" 
+                        class="filter-btn px-4 py-2 rounded-xl bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                    Active
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card rounded-2xl p-6 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full" id="usersTable">
+                <thead>
+                    <tr class="border-b-2 border-gray-200">
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">#</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Username</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Email</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">First Name</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Last Name</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Staff</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Active</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Superuser</th>
+                        <th class="text-left py-4 px-4 font-bold text-gray-700">Joined</th>
+                        <th class="text-center py-4 px-4 font-bold text-gray-700">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_item in users %}
+                    <tr class="user-row border-b hover:bg-gray-50 transition" 
+                        data-username="{{ user_item.username|lower }}"
+                        data-email="{{ user_item.email|lower }}"
+                        data-staff="{{ user_item.is_staff|yesno:'true,false' }}"
+                        data-active="{{ user_item.is_active|yesno:'true,false' }}">
+                        
+                        <!-- ID -->
+                        <td class="py-4 px-4 text-gray-600 font-semibold">{{ forloop.counter }}</td>
+                        
+                        <!-- Username -->
+                        <td class="py-4 px-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">
+                                    {{ user_item.username|slice:":1"|upper }}
+                                </div>
+                                <span class="font-semibold text-gray-800">{{ user_item.username }}</span>
+                            </div>
+                        </td>
+                        
+                        <!-- Email -->
+                        <td class="py-4 px-4 text-gray-700">
+                            {{ user_item.email|default:"No email" }}
+                        </td>
+                        
+                        <!-- First Name -->
+                        <td class="py-4 px-4 text-gray-700">
+                            {{ user_item.first_name|default:"—" }}
+                        </td>
+                        
+                        <!-- Last Name -->
+                        <td class="py-4 px-4 text-gray-700">
+                            {{ user_item.last_name|default:"—" }}
+                        </td>
+                        
+                        <!-- Is Staff -->
+                        <td class="py-4 px-4 text-center">
+                            {% if user_item.is_staff %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-purple-100 text-purple-600 rounded-full">
+                                ✓
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-gray-100 text-gray-400 rounded-full">
+                                ✗
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Is Active -->
+                        <td class="py-4 px-4 text-center">
+                            {% if user_item.is_active %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full">
+                                ✓
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-red-100 text-red-600 rounded-full">
+                                ✗
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Is Superuser -->
+                        <td class="py-4 px-4 text-center">
+                            {% if user_item.is_superuser %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-yellow-100 text-yellow-600 rounded-full">
+                                ★
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center justify-center w-6 h-6 bg-gray-100 text-gray-400 rounded-full">
+                                —
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Date Joined -->
+                        <td class="py-4 px-4 text-gray-600 text-sm">
+                            {{ user_item.date_joined|date:"M d, Y" }}
+                            <br>
+                            <span class="text-xs text-gray-400">{{ user_item.date_joined|date:"g:i A" }}</span>
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="py-4 px-4 text-center">
+                            <div class="flex gap-2 justify-center">
+                                <button onclick="viewUser({{ user_item.id }})" 
+                                        class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-blue-200 transition"
+                                        title="View Details">
+                                    👁️
+                                </button>
+                               <button onclick="editUser({{ user_item.id }})" 
+        class="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-purple-200 transition"
+        title="Edit User">
+    ✏️
+</button>
+                                {% if user_item.id != user.id %}
+                                <button onclick="deleteUser({{ user_item.id }}, '{{ user_item.username }}')" 
+                                        class="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-200 transition"
+                                        title="Delete User">
+                                    🗑️
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="py-8 text-center text-gray-500">
+                            No users found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-purple-900">{{ users.count }}</div>
+            <div class="text-sm text-gray-600">Total Users</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-yellow-900">{{ staff_count }}</div>
+            <div class="text-sm text-gray-600">Staff Members</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-green-900">{{ active_count }}</div>
+            <div class="text-sm text-gray-600">Active Users</div>
+        </div>
+        <div class="card rounded-2xl p-4 text-center">
+            <div class="text-3xl font-bold text-blue-900">{{ superuser_count }}</div>
+            <div class="text-sm text-gray-600">Superusers</div>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">User Details</h2>
+            <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">×</button>
+        </div>
+        <div id="modalContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Add New User</h2>
+            <button onclick="closeAddUserModal()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+        </div>
+        <div id="addUserContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.user-row');
+        
+        rows.forEach(row => {
+            const username = row.getAttribute('data-username');
+            const email = row.getAttribute('data-email');
+            
+            if (username.includes(searchTerm) || email.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Filter functionality
+    function filterUsers(type) {
+        const rows = document.querySelectorAll('.user-row');
+        const buttons = document.querySelectorAll('.filter-btn');
+        
+        // Update button styles
+        buttons.forEach(btn => {
+            btn.classList.remove('bg-purple-500', 'text-white', 'active');
+            btn.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        event.target.classList.remove('bg-gray-200', 'text-gray-700');
+        event.target.classList.add('bg-purple-500', 'text-white', 'active');
+        
+        // Filter rows
+        rows.forEach(row => {
+            if (type === 'all') {
+                row.style.display = '';
+            } else if (type === 'staff') {
+                row.style.display = row.getAttribute('data-staff') === 'true' ? '' : 'none';
+            } else if (type === 'active') {
+                row.style.display = row.getAttribute('data-active') === 'true' ? '' : 'none';
+            }
+        });
+    }
+
+    // View user details
+    function viewUser(userId) {
+        const modal = document.getElementById('userModal');
+        const content = document.getElementById('modalContent');
+        
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                <p class="mt-4 text-gray-600">Loading user details...</p>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+        
+        fetch(`/admin_auth/users/${userId}/details/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const user = data.user;
+                content.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Username</p>
+                                <p class="font-bold text-gray-800">${user.username}</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Email</p>
+                                <p class="font-bold text-gray-800">${user.email}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">First Name</p>
+                                <p class="font-semibold text-gray-700">${user.first_name}</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Last Name</p>
+                                <p class="font-semibold text-gray-700">${user.last_name}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-xl text-center">
+                                <p class="text-sm text-blue-600 mb-1">Staff</p>
+                                <p class="text-2xl">${user.is_staff ? '✓' : '✗'}</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl text-center">
+                                <p class="text-sm text-green-600 mb-1">Active</p>
+                                <p class="text-2xl">${user.is_active ? '✓' : '✗'}</p>
+                            </div>
+                            <div class="bg-yellow-50 p-4 rounded-xl text-center">
+                                <p class="text-sm text-yellow-600 mb-1">Superuser</p>
+                                <p class="text-2xl">${user.is_superuser ? '★' : '—'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Joined</p>
+                                <p class="font-semibold text-gray-800">${user.date_joined}</p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-xl">
+                                <p class="text-sm text-gray-500 mb-1">Last Login</p>
+                                <p class="font-semibold text-gray-800">${user.last_login}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="editUser(${user.id})" 
+                                    class="flex-1 bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition">
+                                ✏️ Edit User
+                            </button>
+                            <button onclick="closeModal()" 
+                                    class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-600 font-semibold">❌ Error loading user details</p>
+                        <p class="text-gray-600 mt-2">${data.error || 'Please try again'}</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-red-600 font-semibold">❌ Error loading user details</p>
+                    <p class="text-gray-600 mt-2">Please try again</p>
+                </div>
+            `;
+            console.error('Error:', error);
+        });
+    }
+
+    
+  // Edit user
+function editUser(userId) {
+    console.log('Opening edit modal for user:', userId); // Debug log
+    
+    const modal = document.getElementById('userModal');
+    const content = document.getElementById('modalContent');
+    
+    if (!modal) {
+        alert('❌ Modal element not found!');
+        console.error('userModal not found');
+        return;
+    }
+    
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p class="mt-4 text-gray-600">Loading user details...</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex'; // Force display
+    
+    console.log('Fetching user details...'); // Debug log
+    
+    fetch(`/admin_auth/users/${userId}/details/`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data); // Debug log
+        
+        if (data.success) {
+            const user = data.user;
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Edit User: ${user.username}</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                            <input type="text" id="firstName" value="${user.first_name === '—' ? '' : user.first_name}" placeholder="First name" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                            <input type="text" id="lastName" value="${user.last_name === '—' ? '' : user.last_name}" placeholder="Last name" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" value="${user.email}" placeholder="Email" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="isActive" ${user.is_active ? 'checked' : ''} class="w-4 h-4">
+                            <span class="text-sm font-semibold text-gray-700">Active</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="saveUserChanges(${user.id})" 
+                                class="flex-1 bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition">
+                            💾 Save Changes
+                        </button>
+                       <button type="button" onclick="closeModal()" 
+        class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+    Cancel
+</button>
+                    </div>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-red-600 font-semibold">❌ Error loading user details</p>
+                    <p class="text-gray-600 mt-2">${data.error || 'Please try again'}</p>
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error); // Debug log
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <p class="text-red-600 font-semibold">❌ Error loading user details</p>
+                <p class="text-gray-600 mt-2">Please try again</p>
+            </div>
+        `;
+    });
+}
+    // Save user changes
+    function saveUserChanges(userId) {
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const email = document.getElementById('email');
+        const isActive = document.getElementById('isActive');
+        
+        if (!firstName || !lastName || !email || !isActive) {
+            alert('❌ Form elements not found');
+            return;
+        }
+        
+        const firstNameValue = firstName.value.trim();
+        const lastNameValue = lastName.value.trim();
+        const emailValue = email.value.trim();
+        const isActiveValue = isActive.checked;
+        
+        if (!emailValue || !emailValue.includes('@')) {
+            alert('❌ Please enter a valid email');
+            return;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        const saveBtn = event.target;
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '⏳ Saving...';
+        
+        fetch(`/admin_auth/users/${userId}/edit/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                first_name: firstNameValue,
+                last_name: lastNameValue,
+                email: emailValue,
+                is_active: isActiveValue
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ User updated successfully!');
+                closeModal();
+                location.reload();
+            } else {
+                alert('❌ Error: ' + (data.error || 'Failed to update user'));
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            alert('❌ Error: ' + error.message);
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+        });
+    }
+
+    // Delete user
+    function deleteUser(userId, username) {
+        if (confirm(`⚠️ Are you sure you want to delete "${username}"?\n\nThis action cannot be undone!`)) {
+            const csrftoken = getCookie('csrftoken');
+            
+            fetch(`/admin_auth/users/${userId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.querySelector(`[data-username="${username.toLowerCase()}"]`);
+                    if (row) {
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            location.reload();
+                        }, 300);
+                    }
+                    alert('✅ User deleted successfully!');
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Failed to delete user'));
+                }
+            })
+            .catch(error => {
+                alert('❌ Error: ' + error.message);
+            });
+        }
+    }
+
+    // OPEN ADD USER MODAL
+    function openAddUserModal() {
+        const modal = document.getElementById('addUserModal');
+        const content = document.getElementById('addUserContent');
+        
+        content.innerHTML = `
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Username *</label>
+                        <input type="text" id="newUsername" placeholder="Username" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email *</label>
+                        <input type="email" id="newEmail" placeholder="Email" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                        <input type="text" id="newFirstName" placeholder="First name" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                        <input type="text" id="newLastName" placeholder="Last name" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password *</label>
+                    <input type="password" id="newPassword" placeholder="Password" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none">
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="newIsActive" checked class="w-4 h-4">
+                        <span class="text-sm font-semibold text-gray-700">Active</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="newIsStaff" class="w-4 h-4">
+                        <span class="text-sm font-semibold text-gray-700">Staff</span>
+                    </label>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button onclick="createNewUser()" 
+                            class="flex-1 bg-green-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-600 transition">
+                        ➕ Create User
+                    </button>
+                    <button onclick="closeAddUserModal()" 
+                            class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+        modal.classList.remove('hidden');
+    }
+
+    // CLOSE ADD USER MODAL
+    function closeAddUserModal() {
+        document.getElementById('addUserModal').classList.add('hidden');
+    }
+
+    // CREATE NEW USER
+    function createNewUser() {
+        const username = document.getElementById('newUsername').value.trim();
+        const email = document.getElementById('newEmail').value.trim();
+        const firstName = document.getElementById('newFirstName').value.trim();
+        const lastName = document.getElementById('newLastName').value.trim();
+        const password = document.getElementById('newPassword').value;
+        const isActive = document.getElementById('newIsActive').checked;
+        const isStaff = document.getElementById('newIsStaff').checked;
+        
+        // Validation
+        if (!username) {
+            alert('❌ Username is required');
+            return;
+        }
+        
+        if (!email || !email.includes('@')) {
+            alert('❌ Valid email is required');
+            return;
+        }
+        
+        if (!password) {
+            alert('❌ Password is required');
+            return;
+        }
+        
+        const csrftoken = getCookie('csrftoken');
+        const createBtn = event.target;
+        const originalText = createBtn.innerHTML;
+        createBtn.disabled = true;
+        createBtn.innerHTML = '⏳ Creating...';
+        
+        fetch(`/admin_auth/users/create/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                email: email,
+                first_name: firstName,
+                last_name: lastName,
+                password: password,
+                is_active: isActive,
+                is_staff: isStaff
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response:', data);
+            if (data.success) {
+                alert('✅ User created successfully!');
+                closeAddUserModal();
+                location.reload();
+            } else {
+                alert('❌ Error: ' + (data.error || 'Failed to create user'));
+                createBtn.disabled = false;
+                createBtn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            alert('❌ Error: ' + error.message);
+            console.error('Error:', error);
+            createBtn.disabled = false;
+            createBtn.innerHTML = originalText;
+        });
+    }
+
+    // Close modals
+ function closeModal() {
+    console.log('Closing modal'); // Debug log
+    const modal = document.getElementById('userModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}
+
+    // Close on outside click
+    document.getElementById('userModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+
+    document.getElementById('addUserModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAddUserModal();
+        }
+    });
+
+    // Keyboard shortcut
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('searchInput').focus();
+        }
+        if (e.key === 'Escape') {
+            closeModal();
+            closeAddUserModal();
+        }
+    });
+</script>
+{% endblock %}
