@@ -26,3 +26,11 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+
+
+.env
+*.pyc
+__pycache__/
+*.sqlite3
+staticfiles/
